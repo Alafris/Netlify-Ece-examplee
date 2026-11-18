@@ -166,3 +166,8 @@ footer a:hover {
     width: 100%;
   }
 }
+
+/* Hidden honeypot field for Netlify Forms spam protection */
+.hidden {
+  display: none;
+}

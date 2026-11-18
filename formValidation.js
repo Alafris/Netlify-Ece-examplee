@@ -1,4 +1,8 @@
 document.getElementById('contactForm').addEventListener('submit', function(event) {
+    // Αποτρέπουμε την κανονική αποστολή — η φόρμα στέλνεται στο Netlify Forms μέσω fetch
+    event.preventDefault();
+    const form = event.target;
+
     // Ανάκτηση τιμών από τα πεδία
     const name = document.querySelector('input[name="fullname"]').value.trim();
     const email = document.querySelector('input[name="email"]').value.trim();
@@ -32,12 +36,32 @@ document.getElementById('contactForm').addEventListener('submit', function(event
         return;
     }
 
-    // Απόκρυψη φόρμας και εμφάνιση μηνύματος ευχαριστίας
-    document.getElementById('contactForm').style.display = 'none';
-    document.getElementById('thankYouMessage').style.display = 'block';
+    // Αποστολή της φόρμας στο Netlify Forms (URL-encoded, όχι JSON)
+    const submitButton = form.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
 
-    // Επαναφόρτωση της σελίδας μετά από 5 δευτερόλεπτα
-    setTimeout(function() {
-        location.reload();
-    }, 5000);
+    fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(new FormData(form)).toString()
+    })
+        .then(function(response) {
+            if (!response.ok) {
+                throw new Error('Form submission failed with status ' + response.status);
+            }
+
+            // Απόκρυψη φόρμας και εμφάνιση μηνύματος ευχαριστίας
+            form.style.display = 'none';
+            document.getElementById('thankYouMessage').style.display = 'block';
+
+            // Επαναφόρτωση της σελίδας μετά από 5 δευτερόλεπτα
+            setTimeout(function() {
+                location.reload();
+            }, 5000);
+        })
+        .catch(function(error) {
+            console.error(error);
+            alert('Sorry, something went wrong sending your message. Please try again.');
+            submitButton.disabled = false;
+        });
 });
